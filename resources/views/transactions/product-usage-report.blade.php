@@ -52,7 +52,7 @@
                             <option value="">All Users</option>
                             @foreach($users as $user)
                                 <option value="{{ $user->id }}" {{ request('used_by_user_id') == $user->id ? 'selected' : '' }}>
-                                    {{ $user->name }}
+                                    {{ $user->full_name }}
                                 </option>
                             @endforeach
                         </select>
@@ -116,7 +116,7 @@
                                 <tr>
                                     <td>{{ $usage->product->name }}</td>
                                     <td>{{ $usage->field ? $usage->field->bloc_number . ' (' . $usage->field->crop_type . ')' : 'N/A' }}</td>
-                                    <td>{{ $usage->usedBy ? $usage->usedBy->name : 'N/A' }}</td>
+                                    <td>{{ $usage->usedBy ? $usage->usedBy->full_name : 'N/A' }}</td>
                                     <td class="text-end">{{ number_format($usage->total_quantity, 2) }}</td>
                                     <td class="text-end">{{ $usage->usage_count }}</td>
                                 </tr>
@@ -158,7 +158,7 @@
                                     <td>{{ $transaction->product->name }}</td>
                                     <td class="text-end">{{ $transaction->quantity }}</td>
                                     <td>{{ $transaction->field ? $transaction->field->bloc_number . ' (' . $transaction->field->crop_type . ')' : 'N/A' }}</td>
-                                    <td>{{ $transaction->usedBy ? $transaction->usedBy->name : 'N/A' }}</td>
+                                    <td>{{ $transaction->usedBy ? $transaction->usedBy->full_name : 'N/A' }}</td>
                                     <td>{{ $transaction->notes }}</td>
                                 </tr>
                             @endforeach

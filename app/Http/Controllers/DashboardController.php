@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
-use App\Models\InventoryTransaction;
 use App\Models\Category;
-use Illuminate\Http\Request;
+use App\Models\InventoryTransaction;
+use App\Models\Product;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -44,20 +44,20 @@ class DashboardController extends Controller
 
         return response()->json([
             'dates' => $dates,
-            'values' => $values
+            'values' => $values,
         ]);
     }
 
     public function getCategoryDistribution()
     {
         $categories = Category::withCount('products')->get();
-        
+
         $labels = $categories->pluck('name')->toArray();
         $values = $categories->pluck('products_count')->toArray();
 
         return response()->json([
             'labels' => $labels,
-            'values' => $values
+            'values' => $values,
         ]);
     }
 

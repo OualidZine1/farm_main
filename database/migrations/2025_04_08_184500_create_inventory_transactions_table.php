@@ -15,12 +15,20 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained();
             $table->foreignId('user_id')->constrained();
+            $table->foreignId('used_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->enum('type', ['in', 'out']);
             $table->integer('quantity');
-            $table->foreignId('field_id')->nullable()->constrained();
+            $table->decimal('price', 10, 2)->nullable();
+            $table->unsignedBigInteger('source_transaction_id')->nullable();
+            $table->foreignId('field_id')->nullable()->constrained()->nullOnDelete();
             $table->date('date');
             $table->text('notes')->nullable();
             $table->timestamps();
+
+            $table->foreign('source_transaction_id')
+                ->references('id')
+                ->on('inventory_transactions')
+                ->nullOnDelete();
         });
     }
 

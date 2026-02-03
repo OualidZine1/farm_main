@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
         $admin = \App\Models\User::firstOrCreate(
             ['email' => 'oualid.zine@uit.ac.ma'],
             [
-                'name' => 'Oualid Zine',
                 'firstname' => 'Oualid',
                 'lastname' => 'Zine',
                 'password' => Hash::make('password'),
@@ -32,7 +31,6 @@ class DatabaseSeeder extends Seeder
         $user = \App\Models\User::firstOrCreate(
             ['email' => 'user@example.com'],
             [
-                'name' => 'Regular Manager',
                 'firstname' => 'Regular',
                 'lastname' => 'Manager',
                 'password' => Hash::make('password'),

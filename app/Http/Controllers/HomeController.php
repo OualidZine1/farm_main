@@ -2,10 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\InventoryTransaction;
-use App\Models\Product;
-use App\Models\User;
 use Carbon\Carbon;
 
 class HomeController extends Controller

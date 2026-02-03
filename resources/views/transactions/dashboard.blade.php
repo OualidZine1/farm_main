@@ -200,7 +200,7 @@
                                         <td class="{{ $transaction->type === 'in' ? 'text-success' : 'text-danger' }}">
                                             {{ $transaction->type === 'in' ? '+' : '-' }}{{ $transaction->quantity }}
                                         </td>
-                                        <td>{{ $transaction->user->name }}</td>
+                                        <td>{{ $transaction->user->full_name }}</td>
                                     </tr>
                                 @empty
                                     <tr>

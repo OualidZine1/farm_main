@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->foreignId('category_id')->constrained();
             $table->integer('current_quantity')->default(0);
-$table->decimal('price', 10, 2)->default(0);
+            $table->integer('min_quantity')->default(10);
+            $table->decimal('price', 10, 2)->default(0);
             $table->text('description')->nullable();
             $table->timestamps();
         });

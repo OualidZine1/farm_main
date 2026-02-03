@@ -3,16 +3,17 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ProductUsageExport implements FromCollection, WithHeadings, WithMapping, WithTitle, ShouldAutoSize, WithStyles
+class ProductUsageExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected $transactions;
+
     protected $summary;
 
     public function __construct($transactions, $summary)
@@ -34,7 +35,7 @@ class ProductUsageExport implements FromCollection, WithHeadings, WithMapping, W
             'Quantity',
             'Field',
             'Used By',
-            'Notes'
+            'Notes',
         ];
     }
 
@@ -44,9 +45,9 @@ class ProductUsageExport implements FromCollection, WithHeadings, WithMapping, W
             $transaction->date->format('Y-m-d'),
             $transaction->product->name,
             $transaction->quantity,
-            $transaction->field ? $transaction->field->bloc_number . ' (' . $transaction->field->crop_type . ')' : 'N/A',
-            $transaction->usedBy ? $transaction->usedBy->name : 'N/A',
-            $transaction->notes
+            $transaction->field ? $transaction->field->bloc_number.' ('.$transaction->field->crop_type.')' : 'N/A',
+            $transaction->usedBy ? $transaction->usedBy->full_name : 'N/A',
+            $transaction->notes,
         ];
     }
 
@@ -62,34 +63,34 @@ class ProductUsageExport implements FromCollection, WithHeadings, WithMapping, W
 
         // Add summary information
         $row = $this->transactions->count() + 3; // Add some space after the data
-        
+
         // Add summary header
-        $sheet->setCellValue('A' . $row, 'Summary');
-        $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+        $sheet->setCellValue('A'.$row, 'Summary');
+        $sheet->getStyle('A'.$row)->getFont()->setBold(true);
         $row++;
-        
+
         // Add summary headers
-        $sheet->setCellValue('A' . $row, 'Product');
-        $sheet->setCellValue('B' . $row, 'Field');
-        $sheet->setCellValue('C' . $row, 'Used By');
-        $sheet->setCellValue('D' . $row, 'Total Quantity');
-        $sheet->setCellValue('E' . $row, 'Usage Count');
-        $sheet->getStyle('A' . $row . ':E' . $row)->getFont()->setBold(true);
+        $sheet->setCellValue('A'.$row, 'Product');
+        $sheet->setCellValue('B'.$row, 'Field');
+        $sheet->setCellValue('C'.$row, 'Used By');
+        $sheet->setCellValue('D'.$row, 'Total Quantity');
+        $sheet->setCellValue('E'.$row, 'Usage Count');
+        $sheet->getStyle('A'.$row.':E'.$row)->getFont()->setBold(true);
         $row++;
-        
+
         // Add summary data
         foreach ($this->summary as $item) {
-            $sheet->setCellValue('A' . $row, $item->product->name);
-            $sheet->setCellValue('B' . $row, $item->field ? $item->field->bloc_number . ' (' . $item->field->crop_type . ')' : 'N/A');
-            $sheet->setCellValue('C' . $row, $item->usedBy ? $item->usedBy->name : 'N/A');
-            $sheet->setCellValue('D' . $row, $item->total_quantity);
-            $sheet->setCellValue('E' . $row, $item->usage_count);
+            $sheet->setCellValue('A'.$row, $item->product->name);
+            $sheet->setCellValue('B'.$row, $item->field ? $item->field->bloc_number.' ('.$item->field->crop_type.')' : 'N/A');
+            $sheet->setCellValue('C'.$row, $item->usedBy ? $item->usedBy->full_name : 'N/A');
+            $sheet->setCellValue('D'.$row, $item->total_quantity);
+            $sheet->setCellValue('E'.$row, $item->usage_count);
             $row++;
         }
-        
+
         // Add grand total
-        $sheet->setCellValue('C' . $row, 'Grand Total:');
-        $sheet->setCellValue('D' . $row, collect($this->summary)->sum('total_quantity'));
-        $sheet->getStyle('A' . $row . ':E' . $row)->getFont()->setBold(true);
+        $sheet->setCellValue('C'.$row, 'Grand Total:');
+        $sheet->setCellValue('D'.$row, collect($this->summary)->sum('total_quantity'));
+        $sheet->getStyle('A'.$row.':E'.$row)->getFont()->setBold(true);
     }
 }

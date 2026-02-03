@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Database\Seeder;
 
 class DemoDataSeeder extends Seeder
 {
@@ -108,13 +108,13 @@ class DemoDataSeeder extends Seeder
             // Extract the price and quantity as they're not part of the product anymore
             $price = $productData['price'];
             $quantity = $productData['quantity'];
-            
+
             // Remove price and quantity from product data
             unset($productData['price'], $productData['quantity']);
-            
+
             // Create the product
             $product = Product::create($productData);
-            
+
             // Create initial inventory transaction
             \App\Models\InventoryTransaction::create([
                 'product_id' => $product->id,
@@ -125,7 +125,7 @@ class DemoDataSeeder extends Seeder
                 'date' => now(),
                 'notes' => 'Initial stock',
             ]);
-            
+
             // Update product's current_quantity
             $product->current_quantity = $quantity;
             $product->save();
@@ -151,4 +151,3 @@ class DemoDataSeeder extends Seeder
         }
     }
 }
-

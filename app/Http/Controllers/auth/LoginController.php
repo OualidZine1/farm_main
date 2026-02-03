@@ -3,19 +3,17 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class LoginController extends Controller
 {
     /**
      * Show the login form
-     *
-     * @return \Illuminate\View\View
      */
     public function showLoginForm(): View
     {
@@ -24,14 +22,11 @@ class LoginController extends Controller
 
     /**
      * Handle a login request to the application
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function login(Request $request): RedirectResponse
     {
         // Implement rate limiting to prevent brute force attacks
-        $throttleKey = Str::lower($request->input('email')) . '|' . $request->ip();
+        $throttleKey = Str::lower($request->input('email')).'|'.$request->ip();
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
@@ -68,9 +63,6 @@ class LoginController extends Controller
 
     /**
      * Log the user out of the application
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function logout(Request $request): RedirectResponse
     {

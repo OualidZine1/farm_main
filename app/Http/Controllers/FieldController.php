@@ -14,6 +14,7 @@ class FieldController extends Controller
     public function index()
     {
         $fields = Field::orderBy('bloc_number')->get();
+
         return view('fields.index', compact('fields'));
     }
 

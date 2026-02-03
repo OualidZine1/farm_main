@@ -25,12 +25,11 @@ class UserFactory extends Factory
     {
         $firstName = fake()->firstName();
         $lastName = fake()->lastName();
-        
+
         return [
-            'name' => "$firstName $lastName",
             'firstname' => $firstName,
             'lastname' => $lastName,
-            'email' => strtolower("$firstName.$lastName") . '@example.com',
+            'email' => strtolower("$firstName.$lastName").'@example.com',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),

@@ -60,6 +60,38 @@
             color: #fff !important;
         }
         
+        /* Flash Message Styling */
+        .alert {
+            border-radius: 8px;
+            margin: 1rem 0;
+            padding: 1rem;
+            border: 1px solid transparent;
+            position: relative;
+            padding-right: 2.5rem;
+        }
+        
+        .alert.alert-error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .alert.alert-error .close {
+            color: #721c24;
+            opacity: 0.8;
+        }
+        
+        .alert .close {
+            position: absolute;
+            top: 0.75rem;
+            right: 1rem;
+            font-size: 1.25rem;
+            line-height: 1;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        
     </style>
     @yield('styles')
 </head>
@@ -128,6 +160,21 @@
 
 <!-- Main Content -->
 <div class="container-fluid">
+    <!-- Flash Messages -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    
+    @if(session('error'))
+        <div class="alert alert-error alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-2 d-none d-md-block sidebar p-0 d-flex flex-column" style="min-height: 100vh;">

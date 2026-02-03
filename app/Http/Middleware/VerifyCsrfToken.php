@@ -14,14 +14,14 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         // Add any routes that should be excluded from CSRF verification
     ];
-    
+
     public function handle($request, \Closure $next)
     {
         // Ensure session is started before any view is rendered
-        if ($request->hasSession() && !$request->session()->isStarted()) {
+        if ($request->hasSession() && ! $request->session()->isStarted()) {
             $request->session()->start();
         }
-        
+
         return parent::handle($request, $next);
     }
 }

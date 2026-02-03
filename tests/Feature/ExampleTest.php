@@ -14,6 +14,8 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        // The home route is protected by auth middleware, so guests should be redirected to login
+        $response->assertStatus(302);
+        $response->assertRedirect('/login');
     }
 }

@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Exceptions\AppException;
 use App\Models\Field;
 use App\Models\InventoryTransaction;
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Http\Request;
-
-use App\Services\ProductService;
 use App\Services\CacheService;
-use App\Exceptions\AppException;
+use App\Services\ProductService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
     protected $productService;
+
     protected $cacheService;
 
     public function __construct(ProductService $productService, CacheService $cacheService)
@@ -27,10 +25,13 @@ class ProductController extends Controller
         $this->middleware('auth');
     }
 
+    /**
+     * Get products with low stock levels
+     */
     public function getLowStock(Request $request)
     {
         $products = Product::with('category')
-            ->where('current_quantity', '<', 'min_quantity')
+            ->whereColumn('current_quantity', '<', 'min_quantity')
             ->orderBy('current_quantity', 'asc')
             ->paginate($request->query('length', 10));
 
@@ -38,7 +39,7 @@ class ProductController extends Controller
             'data' => $products->items(),
             'recordsTotal' => $products->total(),
             'recordsFiltered' => $products->total(),
-            'draw' => $request->query('draw', 1)
+            'draw' => $request->query('draw', 1),
         ]);
     }
 
@@ -51,7 +52,7 @@ class ProductController extends Controller
             $products = $this->cacheService->cacheProductSearch($request->search);
         } else {
             $products = Product::with('category')
-                ->when($request->category_id, function($query) use ($request) {
+                ->when($request->category_id, function ($query) use ($request) {
                     $query->where('category_id', $request->category_id);
                 })
                 ->orderBy('name')
@@ -69,6 +70,7 @@ class ProductController extends Controller
     public function create()
     {
         $categories = $this->cacheService->cacheCategories();
+
         return view('products.create', compact('categories'));
     }
 
@@ -92,7 +94,7 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
             $product = Product::create($request->only(['name', 'category_id', 'current_quantity', 'description']));
-            
+
             // If initial quantity is provided, create an initial stock transaction
             if ($product->current_quantity > 0) {
                 InventoryTransaction::create([
@@ -102,18 +104,18 @@ class ProductController extends Controller
                     'quantity' => $product->current_quantity,
                     'price' => $validated['price'],
                     'date' => now(),
-                    'notes' => 'Initial stock'
+                    'notes' => 'Initial stock',
                 ]);
             }
-            
+
             $this->cacheService->flush();
             DB::commit();
-            
+
             return redirect()->route('products.index')
                 ->with('success', 'Product created successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new AppException('Failed to create product: ' . $e->getMessage(), 500);
+            throw new AppException('Failed to create product: '.$e->getMessage(), 500);
         }
     }
 
@@ -130,7 +132,8 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        $categories = Category::all();
+        $categories = $this->cacheService->cacheCategories();
+
         return view('products.edit', compact('product', 'categories'));
     }
 
@@ -149,11 +152,11 @@ class ProductController extends Controller
             // Don't update current_quantity directly as it's managed by transactions
             $product->update($validated);
             $this->cacheService->flush();
-            
+
             return redirect()->route('products.index')
                 ->with('success', 'Product updated successfully!');
         } catch (\Exception $e) {
-            throw new AppException('Failed to update product: ' . $e->getMessage(), 500);
+            throw new AppException('Failed to update product: '.$e->getMessage(), 500);
         }
     }
 
@@ -169,15 +172,14 @@ class ProductController extends Controller
             $product->delete();
             $this->cacheService->flush(); // Clear cache after deleting product
             DB::commit();
+
             return redirect()->route('products.index')
                 ->with('success', 'Product and its transactions deleted successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new AppException('Failed to delete product: ' . $e->getMessage(), 500);
+            throw new AppException('Failed to delete product: '.$e->getMessage(), 500);
         }
     }
-
-
 
     /**
      * Deduct stock from a product and record the transaction using FIFO method.
@@ -208,7 +210,9 @@ class ProductController extends Controller
 
             // First pass: Calculate how much to take from each source transaction
             foreach ($availableStock as $stock) {
-                if ($remainingQuantity <= 0) break;
+                if ($remainingQuantity <= 0) {
+                    break;
+                }
 
                 $quantityToUse = min($remainingQuantity, $stock->quantity);
                 $totalCost += $quantityToUse * $stock->price;
@@ -265,12 +269,14 @@ class ProductController extends Controller
 
             $this->cacheService->flush();
             DB::commit();
+
             return back()->with('success', 'Stock used!');
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new AppException('Failed to use stock: ' . $e->getMessage(), 500);
+            throw new AppException('Failed to use stock: '.$e->getMessage(), 500);
         }
     }
+
     public function showAddStockForm(Product $product)
     {
         return view('products.add-stock', compact('product'));
@@ -305,17 +311,19 @@ class ProductController extends Controller
 
             $this->cacheService->flush();
             DB::commit();
+
             return back()->with('success', 'Stock added!');
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new AppException('Failed to add stock: ' . $e->getMessage(), 500);
+            throw new AppException('Failed to add stock: '.$e->getMessage(), 500);
         }
     }
 
     public function showUseStockForm(Product $product)
     {
-        $fields = Field::all();
-        $users = User::all();
+        $fields = Field::orderBy('bloc_number')->get();
+        $users = User::orderBy('firstname')->get();
+
         return view('products.use-stock', compact('product', 'fields', 'users'));
     }
 
@@ -332,8 +340,8 @@ class ProductController extends Controller
 
             return view('products.transaction-history', compact('product', 'transactions'));
         } catch (\Throwable $e) {
-            \Log::error('Transaction history error: ' . $e->getMessage(), ['exception' => $e]);
-            abort(500, 'Transaction history error: ' . $e->getMessage());
+            \Log::error('Transaction history error: '.$e->getMessage(), ['exception' => $e]);
+            abort(500, 'Transaction history error: '.$e->getMessage());
         }
     }
 }

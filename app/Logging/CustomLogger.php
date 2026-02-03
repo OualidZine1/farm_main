@@ -3,7 +3,6 @@
 namespace App\Logging;
 
 use Illuminate\Log\Logger;
-use Illuminate\Support\Facades\Config;
 
 class CustomLogger
 {

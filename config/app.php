@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
-use Maatwebsite\Excel\ExcelServiceProvider;
 
 return [
 

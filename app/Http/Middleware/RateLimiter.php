@@ -10,14 +10,14 @@ class RateLimiter
 {
     public function handle(Request $request, Closure $next)
     {
-        $key = 'rate_limit_' . $request->ip();
-        
+        $key = 'rate_limit_'.$request->ip();
+
         if (Cache::has($key)) {
             $attempts = Cache::get($key);
-            
+
             if ($attempts >= 5) {
                 return response()->json([
-                    'error' => 'Too many requests. Please try again later.'
+                    'error' => 'Too many requests. Please try again later.',
                 ], 429);
             }
         }

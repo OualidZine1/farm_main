@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class OualidUserSeeder extends Seeder
@@ -18,7 +18,6 @@ class OualidUserSeeder extends Seeder
             [
                 'firstname' => 'Oualid',
                 'lastname' => 'Zine',
-                'name' => 'Oualid Zine',
                 'email' => 'oualid.zine@uit.ac.ma',
                 'cin' => 'CD789012',
                 'role' => 'administrator',

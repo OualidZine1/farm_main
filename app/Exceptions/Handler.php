@@ -3,8 +3,6 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Auth\AuthenticationException;
-use Throwable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -39,7 +37,7 @@ class Handler extends ExceptionHandler
     public function register(): void
     {
         $this->reportable(function (\Exception $e) {
-            Log::error('Application Error: ' . $e->getMessage(), [
+            Log::error('Application Error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'user' => Auth::id() ?? 'guest',
                 'ip' => request()->ip(),
@@ -70,7 +68,7 @@ class Handler extends ExceptionHandler
             return response()->view('errors.minimal', [
                 'message' => $message,
                 'code' => 500,
-                'title' => 'Server Error'
+                'title' => 'Server Error',
             ], 500);
         });
     }

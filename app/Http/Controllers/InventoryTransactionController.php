@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductUsageExport;
 use App\Models\Field;
 use App\Models\InventoryTransaction;
 use App\Models\Product;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Exports\ProductUsageExport;
 use Maatwebsite\Excel\Facades\Excel;
-use Carbon\Carbon;
 
 class InventoryTransactionController extends Controller
 {
@@ -20,32 +20,34 @@ class InventoryTransactionController extends Controller
     public function show($id)
     {
         $transaction = InventoryTransaction::with(['product', 'field', 'enteredBy', 'usedBy'])->findOrFail($id);
+
         return view('transactions.show', compact('transaction'));
     }
+
     public function index(Request $request)
     {
         $transactions = InventoryTransaction::with([
             'product',
             'field',
             'enteredBy',
-            'usedBy'
+            'usedBy',
         ])
-            ->when($request->start_date, function($query) use ($request) {
+            ->when($request->start_date, function ($query) use ($request) {
                 return $query->where('date', '>=', $request->start_date);
             })
-            ->when($request->end_date, function($query) use ($request) {
+            ->when($request->end_date, function ($query) use ($request) {
                 return $query->where('date', '<=', $request->end_date);
             })
-            ->when($request->type, function($query) use ($request) {
+            ->when($request->type, function ($query) use ($request) {
                 return $query->where('type', $request->type);
             })
-            ->when($request->product_id, function($query) use ($request) {
+            ->when($request->product_id, function ($query) use ($request) {
                 return $query->where('product_id', $request->product_id);
             })
-            ->when($request->field_id, function($query) use ($request) {
+            ->when($request->field_id, function ($query) use ($request) {
                 return $query->where('field_id', $request->field_id);
             })
-            ->when($request->used_by_user_id, function($query) use ($request) {
+            ->when($request->used_by_user_id, function ($query) use ($request) {
                 return $query->where('used_by_user_id', $request->used_by_user_id);
             })
             ->orderBy('date', 'desc')
@@ -53,12 +55,12 @@ class InventoryTransactionController extends Controller
 
         $summary = InventoryTransaction::select([
             DB::raw('SUM(CASE WHEN type = "in" THEN quantity ELSE 0 END) as total_in'),
-            DB::raw('SUM(CASE WHEN type = "out" THEN quantity ELSE 0 END) as total_out')
+            DB::raw('SUM(CASE WHEN type = "out" THEN quantity ELSE 0 END) as total_out'),
         ])
-            ->when($request->start_date, function($query) use ($request) {
+            ->when($request->start_date, function ($query) use ($request) {
                 return $query->where('date', '>=', $request->start_date);
             })
-            ->when($request->end_date, function($query) use ($request) {
+            ->when($request->end_date, function ($query) use ($request) {
                 return $query->where('date', '<=', $request->end_date);
             })
             ->first();
@@ -76,7 +78,7 @@ class InventoryTransactionController extends Controller
             'users' => User::all(),
             'summary' => $summary,
             'totalCost' => $totalCost,
-            'filters' => $request->all()
+            'filters' => $request->all(),
         ]);
     }
 
@@ -90,7 +92,7 @@ class InventoryTransactionController extends Controller
             'data' => $transactions->items(),
             'recordsTotal' => $transactions->total(),
             'recordsFiltered' => $transactions->total(),
-            'draw' => $request->query('draw', 1)
+            'draw' => $request->query('draw', 1),
         ]);
     }
 
@@ -100,41 +102,41 @@ class InventoryTransactionController extends Controller
             'product',
             'field',
             'enteredBy',
-            'usedBy'
+            'usedBy',
         ])
-            ->when($request->start_date, function($query) use ($request) {
+            ->when($request->start_date, function ($query) use ($request) {
                 return $query->where('date', '>=', $request->start_date);
             })
-            ->when($request->end_date, function($query) use ($request) {
+            ->when($request->end_date, function ($query) use ($request) {
                 return $query->where('date', '<=', $request->end_date);
             })
-            ->when($request->type, function($query) use ($request) {
+            ->when($request->type, function ($query) use ($request) {
                 return $query->where('type', $request->type);
             })
-            ->when($request->product_id, function($query) use ($request) {
+            ->when($request->product_id, function ($query) use ($request) {
                 return $query->where('product_id', $request->product_id);
             })
-            ->when($request->field_id, function($query) use ($request) {
+            ->when($request->field_id, function ($query) use ($request) {
                 return $query->where('field_id', $request->field_id);
             })
             ->orderBy('date', 'desc')
             ->get();
 
         $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=transactions_export.csv",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=transactions_export.csv',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
-        $callback = function() use ($transactions) {
+        $callback = function () use ($transactions) {
             $file = fopen('php://output', 'w');
 
             fputcsv($file, [
                 'Date', 'Product', 'Type', 'Quantity', 'Price', 'Subtotal',
                 'Field/Block', 'Crop Type', 'Notes',
-                'Recorded By', 'Used By'
+                'Recorded By', 'Used By',
             ]);
 
             // Calculate total cost
@@ -153,8 +155,8 @@ class InventoryTransactionController extends Controller
                     $t->field ? $t->field->bloc_number : 'N/A',
                     $t->field ? $t->field->crop_type : 'N/A',
                     $t->notes,
-                    $t->enteredBy->name,
-                    $t->usedBy ? $t->usedBy->name : 'N/A'
+                    $t->enteredBy->full_name,
+                    $t->usedBy ? $t->usedBy->full_name : 'N/A',
                 ]);
             }
 
@@ -163,7 +165,7 @@ class InventoryTransactionController extends Controller
 
             // Add total cost row
             fputcsv($file, [
-                '', '', '', '', 'TOTAL COST:', number_format($totalCost, 2)
+                '', '', '', '', 'TOTAL COST:', number_format($totalCost, 2),
             ]);
 
             fclose($file);
@@ -179,17 +181,17 @@ class InventoryTransactionController extends Controller
 
         if ($months === 12) {
             // Full calendar year starting January
-            $year = (int)($request->get('year') ?? now()->year);
+            $year = (int) ($request->get('year') ?? now()->year);
             if ($year < 2000 || $year > now()->year) {
                 $year = now()->year;
             }
 
             $startDate = Carbon::createFromDate($year, 1, 1)->startOfDay();
-            $endDate   = Carbon::createFromDate($year, 12, 31)->endOfDay();
+            $endDate = Carbon::createFromDate($year, 12, 31)->endOfDay();
             $currentMonth = Carbon::createFromDate($year, 12, 1);
         } else {
             // Rolling last 6 months from today
-            $endDate   = now()->endOfDay();
+            $endDate = now()->endOfDay();
             $startDate = $endDate->copy()->subMonths(5)->startOfMonth();
             $currentMonth = $endDate->copy()->startOfMonth();
             $year = null;
@@ -207,28 +209,28 @@ class InventoryTransactionController extends Controller
         // Group transactions by month
         $monthlyData = [];
         // $currentMonth = $endDate->copy()->startOfMonth();
-        
+
         // Initialize data for the selected months
-        for ($i = $months-1; $i >= 0; $i--) {
+        for ($i = $months - 1; $i >= 0; $i--) {
             $month = $currentMonth->copy()->subMonths($i);
             $monthKey = $month->format('Y-m');
             $monthlyData[$monthKey] = [
                 'in' => 0,
                 'out' => 0,
                 'balance' => 0,
-                'label' => $month->format('M Y')
+                'label' => $month->format('M Y'),
             ];
         }
-        
+
         // Debug: Log the initialized monthly data
         \Log::info('Initialized monthly data:', $monthlyData);
 
         // Calculate monthly in/out and running balance
         $runningBalance = 0;
-        
+
         foreach ($transactions as $transaction) {
             $monthKey = $transaction->date->format('Y-m');
-            
+
             if (isset($monthlyData[$monthKey])) {
                 if ($transaction->type === 'in') {
                     $monthlyData[$monthKey]['in'] += $transaction->quantity;
@@ -250,14 +252,14 @@ class InventoryTransactionController extends Controller
                     'data' => array_column($monthlyData, 'in'),
                     'backgroundColor' => 'rgba(54, 162, 235, 0.5)',
                     'borderColor' => 'rgba(54, 162, 235, 1)',
-                    'borderWidth' => 1
+                    'borderWidth' => 1,
                 ],
                 [
                     'label' => 'Stock Out',
                     'data' => array_column($monthlyData, 'out'),
                     'backgroundColor' => 'rgba(255, 99, 132, 0.5)',
                     'borderColor' => 'rgba(255, 99, 132, 1)',
-                    'borderWidth' => 1
+                    'borderWidth' => 1,
                 ],
                 [
                     'label' => 'Running Balance',
@@ -265,10 +267,10 @@ class InventoryTransactionController extends Controller
                     'type' => 'line',
                     'borderColor' => 'rgba(75, 192, 192, 1)',
                     'borderWidth' => 2,
-                ]
-            ]
+                ],
+            ],
         ];
-        
+
         // Debug: Log the prepared chart data
         \Log::info('Prepared chart data:', $chartData);
 
@@ -291,21 +293,21 @@ class InventoryTransactionController extends Controller
             'currentBalance' => $currentBalance,
             'selectedMonths' => $months,
             'selectedYear' => $year,
-            'rangeType' => $months
+            'rangeType' => $months,
         ]);
-            
+
         return view('transactions.dashboard', [
             'testData' => $testData,
             'recentIns' => $recentIns,
             'recentOuts' => $recentOuts,
             'totalIn' => $totalIn,
-            'totalOut' => $totalOut
+            'totalOut' => $totalOut,
         ]);
 
         $topProducts = InventoryTransaction::with('product')
             ->select([
                 'product_id',
-                DB::raw('SUM(quantity) as total_used')
+                DB::raw('SUM(quantity) as total_used'),
             ])
             ->where('type', 'out')
             ->groupBy('product_id')
@@ -332,7 +334,7 @@ class InventoryTransactionController extends Controller
             'recentOuts' => $recentOuts,
             'totalIn' => $monthlySummary->sum('total_in'),
             'totalOut' => $monthlySummary->sum('total_out'),
-            'runningBalanceData' => $runningBalanceData
+            'runningBalanceData' => $runningBalanceData,
         ]);
     }
 
@@ -345,22 +347,22 @@ class InventoryTransactionController extends Controller
         $fields = Field::orderBy('bloc_number')->get();
         $users = User::orderBy('firstname')->get();
 
-        $baseQuery = function() use ($request) {
+        $baseQuery = function () use ($request) {
             return InventoryTransaction::with(['product', 'field', 'usedBy'])
                 ->where('type', 'out')
-                ->when($request->product_id, function($query) use ($request) {
+                ->when($request->product_id, function ($query) use ($request) {
                     return $query->where('product_id', $request->product_id);
                 })
-                ->when($request->field_id, function($query) use ($request) {
+                ->when($request->field_id, function ($query) use ($request) {
                     return $query->where('field_id', $request->field_id);
                 })
-                ->when($request->used_by_user_id, function($query) use ($request) {
+                ->when($request->used_by_user_id, function ($query) use ($request) {
                     return $query->where('used_by_user_id', $request->used_by_user_id);
                 })
-                ->when($request->start_date, function($query) use ($request) {
+                ->when($request->start_date, function ($query) use ($request) {
                     return $query->where('date', '>=', $request->start_date);
                 })
-                ->when($request->end_date, function($query) use ($request) {
+                ->when($request->end_date, function ($query) use ($request) {
                     return $query->where('date', '<=', $request->end_date);
                 });
         };
@@ -375,7 +377,7 @@ class InventoryTransactionController extends Controller
                 'field_id',
                 'used_by_user_id',
                 DB::raw('SUM(quantity) as total_quantity'),
-                DB::raw('COUNT(*) as usage_count')
+                DB::raw('COUNT(*) as usage_count'),
             ])
             ->groupBy('product_id', 'field_id', 'used_by_user_id')
             ->orderBy('product_id')
@@ -383,7 +385,7 @@ class InventoryTransactionController extends Controller
             ->orderBy('used_by_user_id')
             ->get()
             ->load(['product', 'field', 'usedBy']);
-            
+
         // Calculate grand totals
         $grandTotalQuantity = $usageByProductFieldUser->sum('total_quantity');
 
@@ -393,9 +395,15 @@ class InventoryTransactionController extends Controller
         // Check if export is requested
         if ($request->has('export')) {
             $allTransactions = $transactions->get();
+            
+            // Check if there are any transactions to export
+            if ($allTransactions->isEmpty()) {
+                return redirect()->back()->with('error', 'There is no data to export with the current filters.');
+            }
+
             return Excel::download(
                 new ProductUsageExport($allTransactions, $usageByProductFieldUser),
-                'product-usage-report-' . now()->format('Y-m-d') . '.xlsx'
+                'product-usage-report-'.now()->format('Y-m-d').'.xlsx'
             );
         }
 
@@ -409,7 +417,7 @@ class InventoryTransactionController extends Controller
             'usageByProductFieldUser' => $usageByProductFieldUser,
             'transactions' => $transactions,
             'filters' => $request->all(),
-            'grandTotalQuantity' => $grandTotalQuantity
+            'grandTotalQuantity' => $grandTotalQuantity,
         ]);
     }
 }
