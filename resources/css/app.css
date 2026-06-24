@@ -1,0 +1,144 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+:root {
+    --farm-green: #2e7d32;
+    --farm-green-bright: #43a047;
+    --farm-ink: #1f2937;
+    --farm-muted: #6b7280;
+    --farm-surface: #ffffff;
+    --farm-border: #dfe5df;
+}
+
+body {
+    background: #f5f7f4;
+    color: var(--farm-ink);
+}
+
+.sidebar {
+    min-height: 100vh;
+    background: var(--farm-green);
+    color: #fff;
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.sidebar .nav-link:hover {
+    color: #111;
+    background: var(--farm-green-bright);
+}
+
+.sidebar .nav-link.active {
+    color: var(--farm-green-bright);
+    background: #fff;
+}
+
+.main-content {
+    padding: 20px;
+}
+
+.page-title {
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.navbar {
+    color: #fff;
+    background: #4caf50 !important;
+}
+
+.navbar .navbar-brand,
+.navbar .navbar-brand i,
+.navbar-nav .nav-link {
+    color: #fff;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #dff4df;
+}
+
+.btn {
+    margin: 1px;
+    border-radius: 8px;
+}
+
+.alert.alert-error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.stock-badge {
+    min-width: 86px;
+}
+
+.stock-badge-low {
+    background: #dc3545;
+}
+
+.stock-badge-watch {
+    background: #ffc107;
+    color: #111;
+}
+
+.stock-badge-ok {
+    background: #198754;
+}
+
+.auth-page {
+    min-height: 100vh;
+    background: linear-gradient(rgba(18, 39, 20, 0.35), rgba(18, 39, 20, 0.35)), url("/images/BackgroundImage.jpg");
+    background-size: cover;
+    background-position: center;
+}
+
+.auth-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+}
+
+.auth-card {
+    width: min(100%, 460px);
+    padding: 28px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+}
+
+.auth-heading {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 22px;
+    color: #2c3e50;
+}
+
+.auth-heading h1 {
+    margin: 0;
+    font-size: 1.65rem;
+    font-weight: 700;
+}
+
+.btn-login {
+    background-color: #2c3e50;
+    border: none;
+    font-weight: 600;
+}
+
+.btn-login:hover,
+.btn-login:focus {
+    background-color: #1a252f;
+}
+
+.auth-link {
+    display: inline-block;
+    margin-top: 16px;
+}
